@@ -1,0 +1,71 @@
+Dependencies for Project 'Kontroler', Target 'Obrovac-Temperatura': (DO NOT MODIFY !)
+F (.\main.c)(0x53389377)(-c --cpu Cortex-M0+ -g -O0 --apcs=interwork -I.\LIB\INCLUDE --diag_suppress 111-I C:\Users\tuvok\Desktop\Periferija_V2\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\3.20.4\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\LPC1100_DFP\1.0.0\Device\Include\LPC11Uxx-D_RTE_ -DCORE_M0 -o .\main.o --omf_browse .\main.crf --depend .\main.d)
+I (.\LIB\INCLUDE\chip.h)(0x53369710)
+I (.\LIB\INCLUDE\lpc_types.h)(0x53369728)
+I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x52FE42FE)
+I (C:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x52FE42FE)
+I (.\LIB\INCLUDE\sys_config.h)(0x53369730)
+I (.\LIB\INCLUDE\cmsis.h)(0x53369714)
+I (.\LIB\INCLUDE\cmsis_11uxx.h)(0x53369714)
+I (.\LIB\INCLUDE\core_cm0.h)(0x53369718)
+I (C:\Keil_v5\ARM\PACK\ARM\CMSIS\3.20.4\CMSIS\Include\core_cmInstr.h)(0x51BAC5E4)
+I (C:\Keil_v5\ARM\PACK\ARM\CMSIS\3.20.4\CMSIS\Include\core_cmFunc.h)(0x512C8EE2)
+I (.\LIB\INCLUDE\pmu_11xx.h)(0x5336972C)
+I (.\LIB\INCLUDE\fmc_11xx.h)(0x5336971E)
+I (.\LIB\INCLUDE\sysctl_11xx.h)(0x53369730)
+I (.\LIB\INCLUDE\clock_11xx.h)(0x53369712)
+I (.\LIB\INCLUDE\iocon_11xx.h)(0x53369724)
+I (.\LIB\INCLUDE\timer_11xx.h)(0x53369732)
+I (.\LIB\INCLUDE\uart_11xx.h)(0x53369734)
+I (.\LIB\INCLUDE\ring_buffer.h)(0x5336972C)
+I (.\LIB\INCLUDE\wwdt_11xx.h)(0x53369750)
+I (.\LIB\INCLUDE\ssp_11xx.h)(0x5336972E)
+I (.\LIB\INCLUDE\romapi_11xx.h)(0x5336972E)
+I (.\LIB\INCLUDE\error.h)(0x5336971C)
+I (.\LIB\INCLUDE\adc_11xx.h)(0x5336970A)
+I (.\LIB\INCLUDE\gpio_11xx_1.h)(0x53369720)
+I (.\LIB\INCLUDE\gpiogroup_11xx.h)(0x53369720)
+I (.\LIB\INCLUDE\pinint_11xx.h)(0x5336972A)
+I (.\LIB\INCLUDE\i2c_11xx.h)(0x53369724)
+I (.\LIB\INCLUDE\usbd_11xx.h)(0x53369736)
+I (ads1248.h)(0x533879C4)
+F (.\ads1248.c)(0x53389435)(-c --cpu Cortex-M0+ -g -O0 --apcs=interwork -I.\LIB\INCLUDE --diag_suppress 111-I C:\Users\tuvok\Desktop\Periferija_V2\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\3.20.4\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\LPC1100_DFP\1.0.0\Device\Include\LPC11Uxx-D_RTE_ -DCORE_M0 -o .\ads1248.o --omf_browse .\ads1248.crf --depend .\ads1248.d)
+I (.\LIB\INCLUDE\chip.h)(0x53369710)
+I (.\LIB\INCLUDE\lpc_types.h)(0x53369728)
+I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x52FE42FE)
+I (C:\Keil_v5\ARM\ARMCC\include\stdbool.h)(0x52FE42FE)
+I (.\LIB\INCLUDE\sys_config.h)(0x53369730)
+I (.\LIB\INCLUDE\cmsis.h)(0x53369714)
+I (.\LIB\INCLUDE\cmsis_11uxx.h)(0x53369714)
+I (.\LIB\INCLUDE\core_cm0.h)(0x53369718)
+I (C:\Keil_v5\ARM\PACK\ARM\CMSIS\3.20.4\CMSIS\Include\core_cmInstr.h)(0x51BAC5E4)
+I (C:\Keil_v5\ARM\PACK\ARM\CMSIS\3.20.4\CMSIS\Include\core_cmFunc.h)(0x512C8EE2)
+I (.\LIB\INCLUDE\pmu_11xx.h)(0x5336972C)
+I (.\LIB\INCLUDE\fmc_11xx.h)(0x5336971E)
+I (.\LIB\INCLUDE\sysctl_11xx.h)(0x53369730)
+I (.\LIB\INCLUDE\clock_11xx.h)(0x53369712)
+I (.\LIB\INCLUDE\iocon_11xx.h)(0x53369724)
+I (.\LIB\INCLUDE\timer_11xx.h)(0x53369732)
+I (.\LIB\INCLUDE\uart_11xx.h)(0x53369734)
+I (.\LIB\INCLUDE\ring_buffer.h)(0x5336972C)
+I (.\LIB\INCLUDE\wwdt_11xx.h)(0x53369750)
+I (.\LIB\INCLUDE\ssp_11xx.h)(0x5336972E)
+I (.\LIB\INCLUDE\romapi_11xx.h)(0x5336972E)
+I (.\LIB\INCLUDE\error.h)(0x5336971C)
+I (.\LIB\INCLUDE\adc_11xx.h)(0x5336970A)
+I (.\LIB\INCLUDE\gpio_11xx_1.h)(0x53369720)
+I (.\LIB\INCLUDE\gpiogroup_11xx.h)(0x53369720)
+I (.\LIB\INCLUDE\pinint_11xx.h)(0x5336972A)
+I (.\LIB\INCLUDE\i2c_11xx.h)(0x53369724)
+I (.\LIB\INCLUDE\usbd_11xx.h)(0x53369736)
+I (ads1248.h)(0x533879C4)
+F (.\ads1248.h)(0x533879C4)()
+F (.\LIB\chip_11uxx_lib.lib)(0x53369702)()
+F (RTE\Device\LPC11U14FBD48_201\startup_LPC11Uxx.s)(0x53369758)(--cpu Cortex-M0+ -g --apcs=interwork -I C:\Users\tuvok\Desktop\Periferija_V2\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\3.20.4\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\LPC1100_DFP\1.0.0\Device\Include\LPC11Uxx--list .\startup_lpc11uxx.lst --xref -o .\startup_lpc11uxx.o --depend .\startup_lpc11uxx.d)
+F (RTE\Device\LPC11U14FBD48_201\system_LPC11Uxx.c)(0x5336975C)(-c --cpu Cortex-M0+ -g -O0 --apcs=interwork -I.\LIB\INCLUDE --diag_suppress 111-I C:\Users\tuvok\Desktop\Periferija_V2\RTE-I C:\Keil_v5\ARM\PACK\ARM\CMSIS\3.20.4\CMSIS\Include-I C:\Keil_v5\ARM\PACK\Keil\LPC1100_DFP\1.0.0\Device\Include\LPC11Uxx-D_RTE_ -DCORE_M0 -o .\system_lpc11uxx.o --omf_browse .\system_lpc11uxx.crf --depend .\system_lpc11uxx.d)
+I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x52FE42FE)
+I (C:\Keil_v5\ARM\PACK\Keil\LPC1100_DFP\1.0.0\Device\Include\LPC11Uxx\LPC11Uxx.h)(0x521F0EB6)
+I (.\LIB\INCLUDE\core_cm0.h)(0x53369718)
+I (C:\Keil_v5\ARM\PACK\ARM\CMSIS\3.20.4\CMSIS\Include\core_cmInstr.h)(0x51BAC5E4)
+I (C:\Keil_v5\ARM\PACK\ARM\CMSIS\3.20.4\CMSIS\Include\core_cmFunc.h)(0x512C8EE2)
+I (C:\Keil_v5\ARM\PACK\Keil\LPC1100_DFP\1.0.0\Device\Include\LPC11Uxx\system_LPC11Uxx.h)(0x4D89E1A8)
