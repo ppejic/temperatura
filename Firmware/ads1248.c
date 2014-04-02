@@ -16,6 +16,35 @@ static void Chip_ADS1248_BufferInit()
 	}
 }
 
+static void ADS1248_PeriphInit(void)
+{
+	uint8_t test_value = 0;
+	
+	Chip_ADS1248_SetBurnout(BURNOUT_OFF);
+	Chip_ADS1248_SetPositiveInput(AIN0);
+	Chip_ADS1248_SetNegativeInput(AIN1);
+	
+	Chip_ADS1248_SetInternalVref(INTERNAL_ON);
+	Chip_ADS1248_SetVrefInput(REF0);
+	Chip_ADS1248_MuxCal(SYS_NORMAL);
+	
+	Chip_ADS1248_SetPGA(PGA32);
+	Chip_ADS1248_SetSPS(SPS5);
+	
+	Chip_ADS1248_SetIdacValue(IDAC_250U);
+	Chip_ADS1248_WriteRegister(IDAC1, 0x8F);
+	
+	test_value = Chip_ADS1248_ReadRegister(MUX0);
+	test_value = Chip_ADS1248_ReadRegister(MUX1);
+	test_value = Chip_ADS1248_ReadRegister(SYS0);
+	test_value = Chip_ADS1248_ReadRegister(IDAC0);
+	test_value = Chip_ADS1248_ReadRegister(IDAC1);
+	
+	if(test_value) __NOP();
+	
+	return;
+}
+
 void Chip_ADS1248_Init()
 {
 	Chip_SSP_DeInit(ADS_SSP);																													//Clear previous setup
@@ -58,6 +87,8 @@ void Chip_ADS1248_Init()
 	Chip_Clock_SetSSP1ClockDiv(1);																										
 	
 	Chip_SSP_Enable(ADS_SSP);
+	
+	ADS1248_PeriphInit();
 }
 
 uint8_t Chip_ADS1248_ReadRegister(uint8_t address)
@@ -74,11 +105,11 @@ uint8_t Chip_ADS1248_ReadRegister(uint8_t address)
 	tx_buf[0] = (RREG | address);																											//Register address 0010 rrrr, 'r' being register address
 	tx_buf[1] = 0;																																		//Num_of_bytes - 1
 	
-	Chip_GPIO_SetPinOutLow(LPC_GPIO, ADS_nSSEL1);																		  //Chip select Low(0)
+	Chip_GPIO_SetPinOutLow(LPC_GPIO, ADS_nSSEL0);																		  //Chip select Low(0)
 		
 	Chip_SSP_RWFrames_Blocking(ADS_SSP, &xf_setup);	
 	
-	Chip_GPIO_SetPinOutHigh(LPC_GPIO, ADS_nSSEL1);																		//Chip select High(1)
+	Chip_GPIO_SetPinOutHigh(LPC_GPIO, ADS_nSSEL0);																		//Chip select High(1)
 		
 	return rx_buf[2];																																	//during transmission 2 rcv. bytes are junk, third is the reg. value
 }
@@ -98,11 +129,11 @@ void Chip_ADS1248_WriteRegister(uint8_t address, uint8_t value)
 	tx_buf[1] = 0;																																		//Num_of_bytes - 1
 	tx_buf[2] = value;																																//Register value
 	
-	Chip_GPIO_SetPinOutLow(LPC_GPIO, ADS_nSSEL1);																		  //Chip select Low(0)
+	Chip_GPIO_SetPinOutLow(LPC_GPIO, ADS_nSSEL0);																		  //Chip select Low(0)
 		
 	Chip_SSP_RWFrames_Blocking(ADS_SSP, &xf_setup);	
 	
-	Chip_GPIO_SetPinOutHigh(LPC_GPIO, ADS_nSSEL1);																		//Chip select High(1)
+	Chip_GPIO_SetPinOutHigh(LPC_GPIO, ADS_nSSEL0);																		//Chip select High(1)
 		
 	return;
 }
@@ -292,6 +323,7 @@ void Chip_ADS1248_SetIdacValue(uint8_t value)
 }
 
 /***************************IDAC1************************************/
+//not working currently
 void Chip_ADS1248_SetIDAC1(uint8_t value)
 {
 	uint8_t idac1 = 0;
@@ -310,7 +342,8 @@ void Chip_ADS1248_SetIDAC1(uint8_t value)
 	
 	return;
 }
-	
+
+//not working currently	
 void Chip_ADS1248_SetIDAC2(uint8_t value)
 {
 	uint8_t idac1 = 0;
