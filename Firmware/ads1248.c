@@ -366,7 +366,8 @@ void Chip_ADS1248_SetIDAC2(uint8_t value)
 /*********************************************************************/
 uint32_t Chip_ADS1248_GetData(void)
 {
-	
+	Chip_IOCON_PinMuxSet(LPC_IOCON, 1, 31, IOCON_FUNC0);
+	Chip_GPIO_SetPinOutHigh(LPC_GPIO, 1, 13);
 	
 	
 	return 0;

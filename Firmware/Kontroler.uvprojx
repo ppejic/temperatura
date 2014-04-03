@@ -102,13 +102,13 @@
         </CommonProperty>
         <DllOption>
           <SimDllName>SARMCM3.DLL</SimDllName>
-          <SimDllArguments> </SimDllArguments>
-          <SimDlgDll>DARMCM1.DLL</SimDlgDll>
-          <SimDlgDllArguments>-pCM0+</SimDlgDllArguments>
+          <SimDllArguments></SimDllArguments>
+          <SimDlgDll>DARMP1.DLL</SimDlgDll>
+          <SimDlgDllArguments>-pLPC11U14</SimDlgDllArguments>
           <TargetDllName>SARMCM3.DLL</TargetDllName>
-          <TargetDllArguments> </TargetDllArguments>
-          <TargetDlgDll>TARMCM1.DLL</TargetDlgDll>
-          <TargetDlgDllArguments>-pCM0+</TargetDlgDllArguments>
+          <TargetDllArguments></TargetDllArguments>
+          <TargetDlgDll>TARMP1.DLL</TargetDlgDll>
+          <TargetDlgDllArguments>-pLPC11U14</TargetDlgDllArguments>
         </DllOption>
         <DebugOption>
           <OPTHX>
@@ -156,7 +156,7 @@
             <CpuDllArguments></CpuDllArguments>
             <PeripheralDll></PeripheralDll>
             <PeripheralDllArguments></PeripheralDllArguments>
-            <InitializationFile></InitializationFile>
+            <InitializationFile>.\INI\initialization.ini</InitializationFile>
             <Driver>BIN\UL2CM3.DLL</Driver>
           </TargetDlls>
         </DebugOption>
@@ -375,8 +375,8 @@
             <uSurpInc>0</uSurpInc>
             <useXO>0</useXO>
             <VariousControls>
-              <MiscControls></MiscControls>
-              <Define></Define>
+              <MiscControls>--cpreproc</MiscControls>
+              <Define>NO_CRP</Define>
               <Undefine></Undefine>
               <IncludePath></IncludePath>
             </VariousControls>
@@ -419,6 +419,31 @@
               <FileType>5</FileType>
               <FilePath>.\ads1248.h</FilePath>
             </File>
+            <File>
+              <FileName>main.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\main.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>USB</GroupName>
+          <Files>
+            <File>
+              <FileName>cdc_desc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\cdc_desc.c</FilePath>
+            </File>
+            <File>
+              <FileName>cdc_main.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\cdc_main.c</FilePath>
+            </File>
+            <File>
+              <FileName>cdc_vcom.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\cdc_vcom.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -429,13 +454,27 @@
               <FileType>4</FileType>
               <FilePath>.\LIB\chip_11uxx_lib.lib</FilePath>
             </File>
+            <File>
+              <FileName>usbd_11uxx_lib.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>.\LIB\usbd_11uxx_lib.lib</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
-          <GroupName>USB</GroupName>
-        </Group>
-        <Group>
           <GroupName>::CMSIS</GroupName>
+          <Files>
+            <File>
+              <FileName>RTX_CM0.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>C:\Keil_v5\ARM\PACK\ARM\CMSIS\3.20.4\CMSIS_RTX\Lib\ARM\RTX_CM0.lib</FilePath>
+            </File>
+            <File>
+              <FileName>RTX_Conf_CM.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>RTE\CMSIS\RTX_Conf_CM.c</FilePath>
+            </File>
+          </Files>
         </Group>
         <Group>
           <GroupName>::Device</GroupName>
@@ -457,9 +496,22 @@
   </Targets>
 
   <RTE>
-    <apis/>
+    <apis>
+      <api Capiversion="1.0" Cclass="CMSIS" Cgroup="RTOS" exclusive="0">
+        <package name="CMSIS" schemaVersion="1.0" url="http://www.keil.com/pack/" vendor="ARM" version="3.20.4"/>
+        <targetInfos>
+          <targetInfo name="Obrovac-Temperatura"/>
+        </targetInfos>
+      </api>
+    </apis>
     <components>
       <component Cclass="CMSIS" Cgroup="CORE" Cvendor="ARM" Cversion="3.20.0" condition="CMSIS Core">
+        <package name="CMSIS" schemaVersion="1.0" url="http://www.keil.com/pack/" vendor="ARM" version="3.20.4"/>
+        <targetInfos>
+          <targetInfo name="Obrovac-Temperatura"/>
+        </targetInfos>
+      </component>
+      <component Cclass="CMSIS" Cgroup="RTOS" Csub="Keil RTX" Cvendor="ARM" Cversion="4.74.0" condition="CMSIS Core">
         <package name="CMSIS" schemaVersion="1.0" url="http://www.keil.com/pack/" vendor="ARM" version="3.20.4"/>
         <targetInfos>
           <targetInfo name="Obrovac-Temperatura"/>
@@ -474,10 +526,12 @@
     </components>
     <files>
       <file attr="config" category="source" name="CMSIS_RTX\Templates\RTX_Conf_CM.c" version="4.70.0">
-        <instance index="0" removed="1">RTE\CMSIS\RTX_Conf_CM.c</instance>
+        <instance index="0">RTE\CMSIS\RTX_Conf_CM.c</instance>
         <component Cclass="CMSIS" Cgroup="RTOS" Csub="Keil RTX" Cvendor="ARM" Cversion="4.74.0" condition="CMSIS Core"/>
         <package name="CMSIS" schemaVersion="1.0" url="http://www.keil.com/pack/" vendor="ARM" version="3.20.4"/>
-        <targetInfos/>
+        <targetInfos>
+          <targetInfo name="Obrovac-Temperatura"/>
+        </targetInfos>
       </file>
       <file attr="config" category="source" condition="LPC11Uxx" name="Device\Source\ARM\startup_LPC11Uxx.s">
         <instance index="0">RTE\Device\LPC11U14FBD48_201\startup_LPC11Uxx.s</instance>
