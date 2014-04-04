@@ -44,14 +44,14 @@
             <NotGenerated>0</NotGenerated>
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
-          <OutputDirectory>.\</OutputDirectory>
+          <OutputDirectory>.\OUT\</OutputDirectory>
           <OutputName>Kontroler</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>0</CreateHexFile>
           <DebugInformation>1</DebugInformation>
           <BrowseInformation>1</BrowseInformation>
-          <ListingPath>.\</ListingPath>
+          <ListingPath>.\LST\</ListingPath>
           <HexFormatSelection>1</HexFormatSelection>
           <Merge32K>0</Merge32K>
           <CreateBatchFile>0</CreateBatchFile>
@@ -417,12 +417,12 @@
             <File>
               <FileName>ads1248.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\ads1248.h</FilePath>
+              <FilePath>.\LIB\INCLUDE\ads1248.h</FilePath>
             </File>
             <File>
               <FileName>main.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\main.h</FilePath>
+              <FilePath>.\LIB\INCLUDE\main.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -435,14 +435,19 @@
               <FilePath>.\cdc_desc.c</FilePath>
             </File>
             <File>
-              <FileName>cdc_main.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\cdc_main.c</FilePath>
-            </File>
-            <File>
               <FileName>cdc_vcom.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\cdc_vcom.c</FilePath>
+            </File>
+            <File>
+              <FileName>cdc_usb.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\cdc_usb.c</FilePath>
+            </File>
+            <File>
+              <FileName>cdc_usb.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\LIB\INCLUDE\cdc_usb.h</FilePath>
             </File>
           </Files>
         </Group>
