@@ -49,7 +49,7 @@
 #define GPIODAT						0x0E
 
 /*****************ADS1248 Command description***************************/
-#define WAKEUP						0x00																					//Exit sleep mode
+#define WAKEUP						0x01																					//Exit sleep mode
 #define SLEEP						  0x02																					//Enter sleep mode
 #define SYNC							0x04																					//Synchronize the A/D conversion
 #define RESET 				 		0x06																					//Reset to power-up values 
@@ -600,7 +600,7 @@ void    						Chip_ADS1248_SetIdacValue(uint8_t chip, uint8_t value);
 
 void    						Chip_ADS1248_SetIDAC1(uint8_t chip, uint8_t value);
 void    						Chip_ADS1248_SetIDAC2(uint8_t chip, uint8_t value);
-uint32_t						Chip_ADS1248_GetTemperature(uint8_t chip, uint8_t rtd);	
+int32_t							Chip_ADS1248_GetTemperature(uint8_t chip, uint8_t rtd);	
 void 								Chip_ADS1248_SelfOffsetCal(uint8_t chip);
 
 #endif

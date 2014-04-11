@@ -470,14 +470,14 @@
           <GroupName>::CMSIS</GroupName>
           <Files>
             <File>
-              <FileName>RTX_CM0.lib</FileName>
-              <FileType>4</FileType>
-              <FilePath>C:\Keil_v5\ARM\PACK\ARM\CMSIS\3.20.4\CMSIS_RTX\Lib\ARM\RTX_CM0.lib</FilePath>
-            </File>
-            <File>
               <FileName>RTX_Conf_CM.c</FileName>
               <FileType>1</FileType>
               <FilePath>RTE\CMSIS\RTX_Conf_CM.c</FilePath>
+            </File>
+            <File>
+              <FileName>RTX_CM0.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>C:\Keil_v5\ARM\PACK\ARM\CMSIS\3.20.4\CMSIS_RTX\Lib\ARM\RTX_CM0.lib</FilePath>
             </File>
           </Files>
         </Group>
@@ -530,7 +530,7 @@
       </component>
     </components>
     <files>
-      <file attr="config" category="source" name="CMSIS_RTX\Templates\RTX_Conf_CM.c" version="4.70.0">
+      <file attr="config" category="source" name="CMSIS_RTX\Templates\RTX_Conf_CM.c">
         <instance index="0">RTE\CMSIS\RTX_Conf_CM.c</instance>
         <component Cclass="CMSIS" Cgroup="RTOS" Csub="Keil RTX" Cvendor="ARM" Cversion="4.74.0" condition="CMSIS Core"/>
         <package name="CMSIS" schemaVersion="1.0" url="http://www.keil.com/pack/" vendor="ARM" version="3.20.4"/>

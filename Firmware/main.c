@@ -18,67 +18,121 @@ const USBD_API_T *g_pUsbApi = &g_usbApi;
 USBD_HANDLE_T g_hUsb;
 static uint8_t g_rxBuff[256];
 
-osThreadDef(GetTemperature, osPriorityAboveNormal, 1, 0);
-osThreadDef(ReadUSB, osPriorityNormal, 1, 0);
-osThreadDef(SendUSB, osPriorityNormal, 1, 0);
+osMailQDef(mail, 2, T_MEAS);
+osMailQId  mail;
+
+osThreadDef(GetTemperature, osPriorityNormal, 1, 0);
+osThreadDef(RX_Thread, osPriorityNormal, 1, 0);
+osThreadDef(TX_Thread, osPriorityNormal, 1, 0);
+
+void FLEX_INT0_IRQHandler(void)
+{
+	Chip_PININT_ClearIntStatus(LPC_PININT, PININTCH(0));
+	osSignalSet(get_temperature_id, OS_DRDY0);
+}
+
+void FLEX_INT1_IRQHandler(void)
+{
+	Chip_PININT_ClearIntStatus(LPC_PININT, PININTCH(1));
+	osSignalSet(get_temperature_id, OS_DRDY1);
+}
 
 void USB_IRQHandler(void)
 {	
 	USBD_API->hw->ISR(g_hUsb);
 	
-	osSignalSet(read_usb_id, USB_RCV_DATA);
+	osSignalSet(rx_id, USB_RCV_DATA);
+}
+
+void TX_Thread (void const *argument)
+{
+	T_MEAS  *rptr;
+  osEvent  evt;
+	
+	while(1)
+	{
+		evt = osMailGet(mail, osWaitForever); 
+		if(evt.status == osEventMail)
+		{
+			rptr = evt.value.p;
+			vcom_write(&g_rxBuff[0], 256);
+			osMailFree(mail, rptr);
+		}
+	}
 }
 
 void GetTemperature(void const *argument)
 {
+	T_MEAS *mptr;
+	
+	Chip_ADS1248_Init();
+	Chip_ADS1248_SelfOffsetCal(CHIP_U1);
+	Chip_ADS1248_SelfOffsetCal(CHIP_U3);
+	
 	while(1)
 	{
-		//osSignalWait(ADS_TEMP_GET, osWaitForever);
-		Chip_ADS1248_GetTemperature(CHIP_U1, RTD_1);
+		osSignalWait(ADS_TEMP_GET, osWaitForever);
+		
+		mptr=osMailAlloc(mail, osWaitForever);
+		mptr->rtd1 = Chip_ADS1248_GetTemperature(CHIP_U1, RTD_1);
+		mptr->rtd2 = Chip_ADS1248_GetTemperature(CHIP_U1, RTD_2);
+		mptr->rtd3 = Chip_ADS1248_GetTemperature(CHIP_U3, RTD_3);
+		mptr->rtd4 = Chip_ADS1248_GetTemperature(CHIP_U3, RTD_4);
+		
+		osMailPut(mail, mptr);
+		osThreadYield();
 	}
 }
 
 
-void ReadUSB(void const *argument)
+void RX_Thread(void const *argument)
 {
 	uint32_t rdCnt = 0;
+	uint8_t i = 0;	
+	uint8_t string_match = 1;
+	
+	USB_Periph_Init();
 	
 	while(1)
 	{
 		osSignalWait(USB_RCV_DATA, osWaitForever);
 
 		rdCnt = vcom_bread(&g_rxBuff[0], 256);
+		
 		if(rdCnt) 
 		{
-			vcom_write(&g_rxBuff[0], rdCnt);
+			//check if the received string is "t1t2t3t4"
+			string_match = 1;
+			for(i = 0; i < RX_STRING; i++)
+			{
+				if(g_rxBuff[i] != rx_string[i])
+				{
+					string_match = 0;
+					break;
+				}
+			}
+			
+			//if the strings match signal GetTemperature() thread
+			if(string_match == 1)
+			{
+				osSignalSet(get_temperature_id, ADS_TEMP_GET);
+			}
+			
+			osThreadYield();
 		}
 	}
 }
 
-void SendUSB(void const *argument)
-{
-	while(1)
-	{
-		osSignalWait(USB_SND_DATA, osWaitForever);
-	}
-}
-
 int main()
-{
+{		
 	osKernelInitialize();
 				
 	get_temperature_id = osThreadCreate(osThread(GetTemperature),NULL);  
-  read_usb_id = osThreadCreate(osThread(ReadUSB),NULL);  
-  send_usb_id = osThreadCreate(osThread(SendUSB),NULL);  
+	rx_id = osThreadCreate(osThread(RX_Thread),NULL);  
+	tx_id	= osThreadCreate(osThread(TX_Thread),NULL);
 	
-	osKernelStart();
-	
-	Chip_ADS1248_Init();
-	USB_Periph_Init();
-	
-	return 0;
+	osKernelStart();	
 }
-
 
 static void usb_pin_clk_init(void)
 {
