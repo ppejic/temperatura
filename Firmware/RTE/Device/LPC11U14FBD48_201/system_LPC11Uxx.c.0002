@@ -120,7 +120,7 @@
 //   </e>
 //
 //   <e> USB Clock Configuration
-#define USB_CLOCK_SETUP       0
+#define USB_CLOCK_SETUP       1
 //     <h> USB PLL Control (USBPLLCTRL)
 //              <i> F_clkout = M * F_clkin = F_CCO / (2 * P)
 //              <i> F_clkin must be in the range of  10 MHz to  25 MHz

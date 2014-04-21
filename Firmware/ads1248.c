@@ -1,6 +1,5 @@
 #include "chip.h"
 #include "ads1248.h"
-#include "cmsis_os.h"
 
 static SSP_ConfigFormat 			ssp_format;
 static uint8_t								rx_buf[BUFFER_SIZE];
@@ -12,7 +11,15 @@ static volatile uint8_t				flag200ms;
 /**********************************************************************************************/
 
 //TO DO: Add interrupt routines
+void FLEX_INT0_IRQHandler(void)
+{
+	Chip_PININT_ClearIntStatus(LPC_PININT, PININTCH(0));
+}
 
+void FLEX_INT1_IRQHandler(void)
+{
+	Chip_PININT_ClearIntStatus(LPC_PININT, PININTCH(1));
+}
 
 /**********************************************************************************************/
 /************************************STATIC FUNCTIONS******************************************/
@@ -40,43 +47,6 @@ static void Chip_ADS1248_BufferInit()
 	}
 }
 
-static void ADS1248_PeriphInit(uint8_t chip)
-{
-	uint8_t test_value = 0;
-	
-	if(chip == 0)
-		return;
-		
-	Chip_ADS1248_SetBurnout(chip, BURNOUT_OFF);
-	Chip_ADS1248_SetInternalVref(chip, INTERNAL_ON);
-	Chip_ADS1248_SetVrefInput(chip, ONBOARD);
-	Chip_ADS1248_MuxCal(chip, SYS_NORMAL);
-	
-	Chip_ADS1248_SetPGA(chip, PGA32);
-	Chip_ADS1248_SetSPS(chip, SPS5);
-	
-	Chip_ADS1248_SetIdacValue(chip, IDAC_250U);
-	
-	test_value = Chip_ADS1248_ReadRegister(chip, MUX0);
-	test_value = Chip_ADS1248_ReadRegister(chip, VBIAS);
-	test_value = Chip_ADS1248_ReadRegister(chip, MUX1);
-	test_value = Chip_ADS1248_ReadRegister(chip, SYS0);
-	test_value = Chip_ADS1248_ReadRegister(chip, OFC0);
-	test_value = Chip_ADS1248_ReadRegister(chip, OFC1);
-	test_value = Chip_ADS1248_ReadRegister(chip, OFC2);
-	test_value = Chip_ADS1248_ReadRegister(chip, FSC0);
-	test_value = Chip_ADS1248_ReadRegister(chip, FSC1);
-	test_value = Chip_ADS1248_ReadRegister(chip, FSC2);
-	test_value = Chip_ADS1248_ReadRegister(chip, IDAC0);	
-	test_value = Chip_ADS1248_ReadRegister(chip, IDAC1);
-	test_value = Chip_ADS1248_ReadRegister(chip, GPIOCFG);
-	test_value = Chip_ADS1248_ReadRegister(chip, GPIODIR);
-	test_value = Chip_ADS1248_ReadRegister(chip, GPIODAT);
-	
-	if(test_value) __NOP();
-
-	return;
-}
 
 static int32_t GetTemperature(uint32_t data)
 {
@@ -190,9 +160,6 @@ void Chip_ADS1248_Init()
 	Chip_Clock_SetSSP1ClockDiv(1);																										
 	
 	Chip_SSP_Enable(ADS_SSP);
-	
-	ADS1248_PeriphInit(CHIP_U1);
-	ADS1248_PeriphInit(CHIP_U3);
 }
 
 uint8_t Chip_ADS1248_ReadRegister(uint8_t chip, uint8_t address)
@@ -264,257 +231,66 @@ void Chip_ADS1248_WriteRegister(uint8_t chip, uint8_t address, uint8_t value)
 	return;
 }
 
-/***************************VBIAS*************************************/
-
-void Chip_ADS1248_SetVBIAS(uint8_t chip, uint8_t value)
-{
-	if(value != VBIAS_OFF && value != VBIAS0 && value != VBIAS1 && value != VBIAS2 && value != VBIAS3 
-		&& value != VBIAS4 && value != VBIAS5 && value != VBIAS6 && value != VBIAS7)
-	{
-		return;
+void Chip_ADS1248_Selfocal(uint8_t chip)
+{	
+	Chip_SSP_DATA_SETUP_T	xf_setup;
+	
+	if(chip == CHIP_U1)
+	{		
+		Chip_ADS1248_BufferInit();		
+		
+		xf_setup.length = BUFFER_SIZE;
+		xf_setup.rx_cnt = 0;
+		xf_setup.tx_cnt = 0;
+		xf_setup.rx_data = rx_buf;
+		xf_setup.tx_data = tx_buf;
+		tx_buf[0] = SYSGCAL;	
+		
+		Chip_GPIO_SetPinOutLow(LPC_GPIO, ADS_nSSEL0);
+		
+		Chip_SSP_RWFrames_Blocking(ADS_SSP, &xf_setup);
+		
+		NVIC_EnableIRQ(PIN_INT0_IRQn);
+		
+		while((Chip_PININT_GetIntStatus(LPC_PININT) && PININTCH(0)) != 1);
+		Chip_PININT_ClearIntStatus(LPC_PININT, PININTCH(0));		
+		
+		NVIC_DisableIRQ(PIN_INT0_IRQn);																				 		
+				
+		Chip_GPIO_SetPinOutHigh(LPC_GPIO, ADS_nSSEL0);														
+			
 	}
-	
-	Chip_ADS1248_WriteRegister(chip, VBIAS, value);
-	
-	return;
-}
-
-/***************************MUX0*************************************/
-void Chip_ADS1248_SetNegativeInput(uint8_t chip, uint8_t value)
-{
-	uint8_t mux0 = 0;
-	
-	if(value != AIN0 && value != AIN1 && value != AIN2 && value != AIN3 
-		&& value != AIN4 && value != AIN5 && value != AIN6 && value != AIN7)
-	{
-		return;
+	else
+	{						
+		Chip_ADS1248_BufferInit();		
+		
+		xf_setup.length = BUFFER_SIZE;
+		xf_setup.rx_cnt = 0;
+		xf_setup.tx_cnt = 0;
+		xf_setup.rx_data = rx_buf;
+		xf_setup.tx_data = tx_buf;				
+		tx_buf[0] = SYSGCAL;	
+		
+		Chip_GPIO_SetPinOutLow(LPC_GPIO, ADS_nSSEL1);
+		
+		Chip_SSP_RWFrames_Blocking(ADS_SSP, &xf_setup);
+		
+		NVIC_EnableIRQ(PIN_INT1_IRQn);
+		
+		while((Chip_PININT_GetIntStatus(LPC_PININT) && PININTCH(1)) != 1);
+		Chip_PININT_ClearIntStatus(LPC_PININT, PININTCH(1));		
+		
+		NVIC_DisableIRQ(PIN_INT1_IRQn);	
+				
+		Chip_GPIO_SetPinOutHigh(LPC_GPIO, ADS_nSSEL1);
+		
 	}
-	
-	mux0 = Chip_ADS1248_ReadRegister(chip, MUX0);
-	mux0 |= value;
-	Chip_ADS1248_WriteRegister(chip, MUX0, mux0);
-	
-	return;
-}
-
-void Chip_ADS1248_SetPositiveInput(uint8_t chip, uint8_t value)
-{
-	uint8_t mux0 = 0;
-	
-	if(value != AIN0 && value != AIN1 && value != AIN2 && value != AIN3 
-		&& value != AIN4 && value != AIN5 && value != AIN6 && value != AIN7)
-	{
-		return;
-	}
-	
-	mux0 = Chip_ADS1248_ReadRegister(chip, MUX0);
-	mux0 |= (value << 3);
-	Chip_ADS1248_WriteRegister(chip, MUX0, mux0);
-	
-	return;
-}
-
-void Chip_ADS1248_SetBurnout(uint8_t chip, uint8_t value)
-{
-	uint8_t mux0 = 0;
-	
-	if(value != BURNOUT_OFF && value != BURNOUT_05U && value != BURNOUT_2U && value != BURNOUT_10U)
-	{
-		return;
-	}
-	
-	mux0 = Chip_ADS1248_ReadRegister(chip, MUX0);
-	mux0 |= (value << 6);
-	Chip_ADS1248_WriteRegister(chip, MUX0, mux0);
-	
-	return;
-}
-
-/***************************MUX1*************************************/
-void Chip_ADS1248_SetInternalVref(uint8_t chip, uint8_t value)
-{
-	uint8_t mux1 = 0;
-	
-	if(value != INTERNAL_OFF && value != INTERNAL_ON && value != INTERNAL_SLEEP)
-	{
-		return;
-	}	
-	
-	mux1 = Chip_ADS1248_ReadRegister(chip, MUX1);
-	mux1 |= value << 5;
-	
-	Chip_ADS1248_WriteRegister(chip, MUX1, mux1);
-	
-	return;
-}
-
-void Chip_ADS1248_SetVrefInput(uint8_t chip, uint8_t value)
-{
-	uint8_t mux1 = 0;
-	
-	if(value != REF0 && value != REF1 && value != ONBOARD && value != ONBOARD_REF0)
-	{
-		return;
-	}
-	
-	mux1 = Chip_ADS1248_ReadRegister(chip, MUX1);
-	mux1 |= value << 3;
-	
-	Chip_ADS1248_WriteRegister(chip, MUX1, mux1);
-	
-	return;
-}
-
-void Chip_ADS1248_MuxCal(uint8_t chip, uint8_t value)
-{
-	uint8_t mux1 = 0;
-	
-	if(value != SYS_NORMAL && value != SYS_OFFSET && value != SYS_GAIN && value != SYS_TEMP_DIODE 
-		&& value != SYS_REF1 && value != SYS_REF0 && value != SYS_AVDD && value != SYS_DVDD)
-	{
-		return;
-	}
-	
-	mux1 = Chip_ADS1248_ReadRegister(chip, MUX1);
-	mux1 |= value;
-	
-	Chip_ADS1248_WriteRegister(chip, MUX1, mux1);
-	
-	return;
-}
-
-/***************************SYS0*************************************/
-void Chip_ADS1248_SetPGA(uint8_t chip, uint8_t value)
-{
-	uint8_t sys0 = 0;
-	
-	if(value != PGA1 && value != PGA2 && value != PGA4 && value != PGA8 
-		&& value != PGA16 && value != PGA32 && value != PGA64 && value != PGA128)
-	{
-		return;
-	}
-	
-	sys0 = Chip_ADS1248_ReadRegister(chip, SYS0);
-	sys0 |= value << 4;
-	
-	Chip_ADS1248_WriteRegister(chip, SYS0, sys0);
-	
-	return;	
-}
-
-void Chip_ADS1248_SetSPS(uint8_t chip, uint8_t value)
-{
-	uint8_t sys0 = 0;
-	
-	if(value != SPS5 && value != SPS10 && value != SPS20 && value != SPS40 
-		&& value != SPS80 && value != SPS160 && value != SPS320 && value != SPS640 
-		&& value != SPS1000 && value != SPS2000)
-	{
-		return;
-	}
-	
-	sys0 = Chip_ADS1248_ReadRegister(chip, SYS0);
-	sys0 |= value;
-	
-	Chip_ADS1248_WriteRegister(chip, SYS0, sys0);
-	
-	return;
-}
-
-/***************************IDAC0************************************/
-void Chip_ADS1248_SetIdacValue(uint8_t chip, uint8_t value)
-{
-	uint8_t idac0 = 0;
-	
-	if(value != IDAC_OFF && value != IDAC_50U && value != IDAC_100U && value != IDAC_250U 
-		&& value != IDAC_500U && value != IDAC_750U && value != IDAC_1000U && value != IDAC_1500U)
-	{
-		return;
-	}
-	
-	idac0 = Chip_ADS1248_ReadRegister(chip, IDAC0);
-	idac0 |= value;
-	
-	Chip_ADS1248_WriteRegister(chip, IDAC0, idac0);
-	
-	return;
-}
-
-/***************************IDAC1************************************/
-//not working currently
-void Chip_ADS1248_SetIDAC1(uint8_t chip, uint8_t value)
-{
-	uint8_t idac1 = 0;
-	
-	if(value != AIN0 && value != AIN1 && value != AIN2 && value != AIN3 
-		&& value != AIN4 && value != AIN5 && value != AIN6 && value != AIN7
-		&& value != IOUT1 && value != IOUT2 && value != DISCONNECT)
-	{
-		return;
-	}
-	
-	idac1 = Chip_ADS1248_ReadRegister(chip, IDAC1);
-	idac1 |= value << 4;
-	
-	Chip_ADS1248_WriteRegister(chip, IDAC1, idac1);
-	
-	return;
-}
-
-//not working currently	
-void Chip_ADS1248_SetIDAC2(uint8_t chip, uint8_t value)
-{
-	uint8_t idac1 = 0;
-	
-	if(value != AIN0 && value != AIN1 && value != AIN2 && value != AIN3 
-		&& value != AIN4 && value != AIN5 && value != AIN6 && value != AIN7
-		&& value != IOUT1 && value != IOUT2 && value != DISCONNECT)
-	{
-		return;
-	}
-	
-	idac1 = Chip_ADS1248_ReadRegister(chip, IDAC1);
-	idac1 |= value;
-	
-	Chip_ADS1248_WriteRegister(chip, IDAC1, idac1);
 	
 	return;
 }
 
 /*********************************************************************/
 
-void Chip_ADS1248_SelfOffsetCal(uint8_t chip)
-{
-	Chip_SSP_DATA_SETUP_T	xf_setup;
-	
-	xf_setup.length = BUFFER_SIZE;
-	xf_setup.rx_cnt = 0;
-	xf_setup.tx_cnt = 0;
-	xf_setup.rx_data = rx_buf;
-	xf_setup.tx_data = tx_buf;
-	
-	Chip_ADS1248_BufferInit();
-	tx_buf[0] = SELFOCAL; 
-	
-	if(chip == CHIP_U1)
-	{
-		Chip_GPIO_SetPinOutLow(LPC_GPIO, ADS_nSSEL0);																		  //Chip select Low(0)
-		
-		Chip_SSP_RWFrames_Blocking(ADS_SSP, &xf_setup);	
-	
-		Chip_GPIO_SetPinOutHigh(LPC_GPIO, ADS_nSSEL0);																		//Chip select High(1)
-	}
-	else
-	{
-		Chip_GPIO_SetPinOutLow(LPC_GPIO, ADS_nSSEL1);																		  //Chip select Low(0)
-		
-		Chip_SSP_RWFrames_Blocking(ADS_SSP, &xf_setup);	
-
-		Chip_GPIO_SetPinOutHigh(LPC_GPIO, ADS_nSSEL1);																		//Chip select High(1)
-	}
-		
-	return;
-}
 int32_t Chip_ADS1248_GetTemperature(uint8_t chip, uint8_t rtd)
 {
 	uint32_t temperatura_raw = 0;
@@ -522,19 +298,24 @@ int32_t Chip_ADS1248_GetTemperature(uint8_t chip, uint8_t rtd)
 	Chip_SSP_DATA_SETUP_T	xf_setup;
 	
 	if(chip == CHIP_U1)
-	{	
-		Chip_GPIO_SetPinOutHigh(LPC_GPIO, ADS_START0);
-		temperatura_raw = Chip_ADS1248_ReadRegister(CHIP_U1, MUX0);
-		
+	{			
 		if(rtd == RTD_1)
 		{
-			Chip_ADS1248_WriteRegister(chip, MUX0, 0x01);
-			Chip_ADS1248_WriteRegister(chip, IDAC1, 0x8F);
+			Chip_ADS1248_WriteRegister(CHIP_U1, MUX0, 0x01);
+			Chip_ADS1248_WriteRegister(CHIP_U1, VBIAS, 0x00);
+			Chip_ADS1248_WriteRegister(CHIP_U1, MUX1, 0x30);
+			Chip_ADS1248_WriteRegister(CHIP_U1, SYS0, 0x60);
+			Chip_ADS1248_WriteRegister(CHIP_U1, IDAC0, 0x03);
+			Chip_ADS1248_WriteRegister(CHIP_U1, IDAC1, 0xf8);
 		}
 		else
 		{
-			Chip_ADS1248_WriteRegister(chip, MUX0, 0x13);
-			Chip_ADS1248_WriteRegister(chip, IDAC1, 0x9F);
+//			Chip_ADS1248_WriteRegister(CHIP_U1, MUX0, 0x13);
+//			Chip_ADS1248_WriteRegister(CHIP_U1, VBIAS, 0x00);
+//			Chip_ADS1248_WriteRegister(CHIP_U1, MUX1, 0x30);
+//			Chip_ADS1248_WriteRegister(CHIP_U1, SYS0, 0x40);
+//			Chip_ADS1248_WriteRegister(CHIP_U1, IDAC0, 0x03);
+//			Chip_ADS1248_WriteRegister(CHIP_U1, IDAC1, 0xf9);
 		}
 		
 		temperatura_raw = Chip_ADS1248_ReadRegister(CHIP_U1, MUX0);
@@ -549,31 +330,39 @@ int32_t Chip_ADS1248_GetTemperature(uint8_t chip, uint8_t rtd)
 		xf_setup.tx_data = tx_buf;
 		tx_buf[0] = RDATA;	
 		
-		Chip_GPIO_SetPinOutLow(LPC_GPIO, ADS_START0);	
+		Chip_GPIO_SetPinOutLow(LPC_GPIO, ADS_START0);
+		NVIC_EnableIRQ(PIN_INT0_IRQn);
 		
-		NVIC_EnableIRQ(PIN_INT0_IRQn);			
-		
-		osSignalWait(0x0004, osWaitForever);
+		while((Chip_PININT_GetIntStatus(LPC_PININT) && PININTCH(0)) != 1);
+		Chip_PININT_ClearIntStatus(LPC_PININT, PININTCH(0));		
 		
 		NVIC_DisableIRQ(PIN_INT0_IRQn);
 		
 		Chip_GPIO_SetPinOutLow(LPC_GPIO, ADS_nSSEL0);																		  //Chip select Low(0)		
 		Chip_SSP_RWFrames_Blocking(ADS_SSP, &xf_setup);		
-		Chip_GPIO_SetPinOutHigh(LPC_GPIO, ADS_nSSEL0);																		//Chip select High(1)		
+		Chip_GPIO_SetPinOutHigh(LPC_GPIO, ADS_nSSEL0);																		//Chip select High(1)	
+			
+		Chip_GPIO_SetPinOutHigh(LPC_GPIO, ADS_START0);
 	}
 	else
-	{
-		Chip_GPIO_SetPinOutHigh(LPC_GPIO, ADS_START1);
-		
+	{		
 		if(rtd == RTD_3)
 		{
-			Chip_ADS1248_WriteRegister(chip, MUX0, 0x01);
-			Chip_ADS1248_WriteRegister(chip, IDAC1, 0x8F);
+//			Chip_ADS1248_WriteRegister(CHIP_U3, MUX0, 0x01);
+//			Chip_ADS1248_WriteRegister(CHIP_U3, VBIAS, 0x00);
+//			Chip_ADS1248_WriteRegister(CHIP_U3, MUX1, 0x30);
+//			Chip_ADS1248_WriteRegister(CHIP_U3, SYS0, 0x40);
+//			Chip_ADS1248_WriteRegister(CHIP_U3, IDAC0, 0x03);
+//			Chip_ADS1248_WriteRegister(CHIP_U3, IDAC1, 0xf8);		
 		}
 		else
 		{
-			Chip_ADS1248_WriteRegister(chip, MUX0, 0x13);
-			Chip_ADS1248_WriteRegister(chip, IDAC1, 0x9F);
+			Chip_ADS1248_WriteRegister(CHIP_U3, MUX0, 0x13);
+			Chip_ADS1248_WriteRegister(CHIP_U3, VBIAS, 0x00);
+			Chip_ADS1248_WriteRegister(CHIP_U3, MUX1, 0x30);
+			Chip_ADS1248_WriteRegister(CHIP_U3, SYS0, 0x60);
+			Chip_ADS1248_WriteRegister(CHIP_U3, IDAC0, 0x03);
+			Chip_ADS1248_WriteRegister(CHIP_U3, IDAC1, 0xf9);	
 		}
 					
 		Chip_ADS1248_BufferInit();		
@@ -582,27 +371,28 @@ int32_t Chip_ADS1248_GetTemperature(uint8_t chip, uint8_t rtd)
 		xf_setup.rx_cnt = 0;
 		xf_setup.tx_cnt = 0;
 		xf_setup.rx_data = rx_buf;
-		xf_setup.tx_data = tx_buf;
+		xf_setup.tx_data = tx_buf;				
 		tx_buf[0] = RDATA;	
-				
-		Chip_GPIO_SetPinOutLow(LPC_GPIO, ADS_START1);	
-
-		NVIC_EnableIRQ(PIN_INT1_IRQn);		
 		
-		osSignalWait(0x0005, osWaitForever);
+		Chip_GPIO_SetPinOutLow(LPC_GPIO, ADS_START1);
+		NVIC_EnableIRQ(PIN_INT1_IRQn);
+		
+		while((Chip_PININT_GetIntStatus(LPC_PININT) && PININTCH(1)) != 1);
+		Chip_PININT_ClearIntStatus(LPC_PININT, PININTCH(1));		
 		
 		NVIC_DisableIRQ(PIN_INT1_IRQn);
 		
 		Chip_GPIO_SetPinOutLow(LPC_GPIO, ADS_nSSEL1);																		  //Chip select Low(0)		
 		Chip_SSP_RWFrames_Blocking(ADS_SSP, &xf_setup);		
 		Chip_GPIO_SetPinOutHigh(LPC_GPIO, ADS_nSSEL1);
+		
+		Chip_GPIO_SetPinOutHigh(LPC_GPIO, ADS_START1);
 	}
 	
 	
 	temperatura_raw = ((rx_buf[1] << 16) & 0x00ff0000) | 
 								((rx_buf[2] << 8) & 0x0000ff00) | 
 								(rx_buf[3] & 0xff);
-
 	temperatura = GetTemperature(temperatura_raw);	
 	
 	return temperatura;

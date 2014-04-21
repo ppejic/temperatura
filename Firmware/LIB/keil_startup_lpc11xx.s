@@ -19,7 +19,7 @@
 ; *
 ; *****************************************************************************/
 
-#include "sys_config.h"
+#define CHIP_LPC11UXX
 
 ; <h> Stack Configuration
 ;   <o> Stack Size (in Bytes) <0x0-0xFFFFFFFF:8>
